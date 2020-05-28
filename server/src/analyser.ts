@@ -6,7 +6,7 @@ import { promisify } from 'util'
 import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
-import { getGlobPattern } from './config'
+import * as config from './config'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
@@ -47,7 +47,7 @@ export default class Analyzer {
     const analyzer = new Analyzer(parser)
 
     if (rootPath) {
-      const globPattern = getGlobPattern()
+      const globPattern = config.getGlobPattern()
       connection.console.log(
         `Analyzing files matching glob "${globPattern}" inside ${rootPath}`,
       )
@@ -497,9 +497,10 @@ export default class Analyzer {
   }
 
   private getAllFileDeclarations({ uri }: { uri?: string } = {}): FileDeclarations {
-    const uris = uri
-      ? [uri, ...Array.from(this.findAllSourcedUris({ uri }))]
-      : Object.keys(this.uriToDeclarations)
+    const uris =
+      uri && config.getCompletionBasedOnImports()
+        ? [uri, ...Array.from(this.findAllSourcedUris({ uri }))]
+        : Object.keys(this.uriToDeclarations)
 
     return uris.reduce((fileDeclarations, uri) => {
       fileDeclarations[uri] = this.uriToDeclarations[uri] || {}
