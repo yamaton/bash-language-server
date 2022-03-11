@@ -83,5 +83,5 @@ async function findExecutablesInPath(path: string): Promise<string[]> {
 
 function isExecutableFile(stats: fs.Stats): boolean {
   const isExecutable = !!(1 & parseInt((stats.mode & parseInt('777', 8)).toString(8)[0]))
-  return stats.isFile() && isExecutable
+  return (stats.isFile() || stats.isSymbolicLink()) && isExecutable
 }
