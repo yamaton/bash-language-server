@@ -13,6 +13,7 @@ import { initializeParser } from './parser'
 import * as ReservedWords from './reservedWords'
 import { BashCompletionItem, CompletionItemDataType } from './types'
 import { uniqueBasedOnHash } from './util/array'
+import { getMsgFromCatch } from './util/catchHandler'
 import { getShellDocumentation } from './util/sh'
 
 const PARAMETER_EXPANSION_PREFIXES = new Set(['$', '${'])
@@ -232,9 +233,8 @@ export default class BashServer {
           }
         }
       } catch (error) {
-        this.connection.console.warn(
-          `getExplainshellDocumentation exception: ${error.message}`,
-        )
+        const msg = getMsgFromCatch(error)
+        this.connection.console.warn(`getExplainshellDocumentation exception: ${msg}`)
       }
     }
 

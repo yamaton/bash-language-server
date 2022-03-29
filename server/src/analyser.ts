@@ -7,6 +7,7 @@ import * as LSP from 'vscode-languageserver'
 import * as Parser from 'web-tree-sitter'
 
 import { getGlobPattern } from './config'
+import { getMsgFromCatch } from './util/catchHandler'
 import { flattenArray, flattenObjectValues } from './util/flatten'
 import { getFilePaths } from './util/fs'
 import { getShebang, isBashShebang } from './util/shebang'
@@ -59,8 +60,9 @@ export default class Analyzer {
       try {
         filePaths = await getFilePaths({ globPattern, rootPath })
       } catch (error) {
+        const msg = getMsgFromCatch(error)
         connection.window.showWarningMessage(
-          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Error: ${error.message}`,
+          `Failed to analyze bash files using the glob "${globPattern}". The experience will be degraded. Error: ${msg}`,
         )
       }
 
@@ -84,7 +86,8 @@ export default class Analyzer {
 
           analyzer.analyze(uri, LSP.TextDocument.create(uri, 'shell', 1, fileContent))
         } catch (error) {
-          connection.console.warn(`Failed analyzing ${uri}. Error: ${error.message}`)
+          const msg = getMsgFromCatch(error)
+          connection.console.warn(`Failed analyzing ${uri}. Error: ${msg}`)
         }
       }
 
